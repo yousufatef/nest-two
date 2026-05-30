@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Put, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -10,17 +9,13 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { Roles } from './decorators/user-role.decorator';
 import { UserType } from '../utils/enums';
 import { AuthRoleGuard } from './guards/auth-role.guard';
+import { AuthProvider } from './auth.provider';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
-
-  @Post()
-  @Roles(UserType.ADMIN)
-  @UseGuards(AuthRoleGuard)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
+  constructor(private readonly usersService: UsersService
+    , private readonly authService: AuthProvider
+  ) { }
 
 
   @Put(':id')
@@ -38,15 +33,13 @@ export class UsersController {
   }
 
   @Post('auth/register')
-  @Roles(UserType.ADMIN)
-  @UseGuards(AuthRoleGuard)
   register(@Body() registerDto: RegisterDto) {
-    return this.usersService.register(registerDto);
+    return this.authService.register(registerDto);
   }
 
   @Post('auth/login')
   login(@Body() loginDto: LoginDto) {
-    return this.usersService.login(loginDto);
+    return this.authService.login(loginDto);
   }
 
   @Get()
@@ -60,6 +53,7 @@ export class UsersController {
   @Get('current-user')
   @UseGuards(AuthGuard)
   getCurrentUser(@CurrentUser() payload: JwtPayloadType) {
+    console.log('Current user payload works');
     return this.usersService.getCurrentUser(payload.id);
   }
 }
