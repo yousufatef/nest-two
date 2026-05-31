@@ -24,10 +24,10 @@ export class Product {
     @UpdateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP, onUpdate: CURRENT_TIMESTAMP })
     updated_at!: Date;
 
-    @OneToMany(() => Review, (review) => review.product)
+    @OneToMany(() => Review, (review) => review.product, { eager: true })
     reviews?: Review[];
 
-    @ManyToOne(() => User, (user) => user.products)
-    user!: User[];
+    @ManyToOne(() => User, (user) => user.products, { eager: true })
+    user!: User;
 
 }
